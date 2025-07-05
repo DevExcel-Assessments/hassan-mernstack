@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import CourseService from '../services/courseService.js';
 import { ArrowLeft, Play, Pause } from 'lucide-react';
 
 const VideoPlayer = () => {
@@ -72,7 +73,7 @@ const VideoPlayer = () => {
         <video
           controls
           className="w-full h-auto"
-          poster={course?.thumbnail}
+          poster={course?.thumbnail ? CourseService.getThumbnailUrl(course.thumbnail) : undefined}
           preload="metadata"
         >
           <source src={videoUrl} type="video/mp4" />

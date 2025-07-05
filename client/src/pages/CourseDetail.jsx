@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import CourseService from '../services/courseService.js';
 import { Clock, User, Star, BookOpen, CheckCircle, DollarSign } from 'lucide-react';
 
 const CourseDetail = () => {
@@ -125,7 +126,7 @@ const CourseDetail = () => {
           <div className="card p-6">
             <div className="relative mb-4">
               <img 
-                src={course.thumbnail || '/api/placeholder/400/300'} 
+                src={course.thumbnail ? CourseService.getThumbnailUrl(course.thumbnail) : '/api/placeholder/400/300'} 
                 alt={course.title}
                 className="w-full h-48 object-cover rounded-lg"
               />
