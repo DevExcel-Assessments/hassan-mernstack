@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import CourseService from '../services/courseService.js';
 import CourseCard from '../components/CourseCard';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, AlertCircle } from 'lucide-react';
 
 const Courses = () => {
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [categories] = useState([
@@ -28,10 +29,15 @@ const Courses = () => {
 
   const fetchCourses = async () => {
     try {
-      const response = await axios.get('/api/courses');
-      setCourses(response.data);
+      const result = await CourseService.getAllCourses();
+      if (result.success) {
+        setCourses(result.courses);
+      } else {
+        setError(result.error);
+      }
     } catch (error) {
       console.error('Error fetching courses:', error);
+      setError('Failed to load courses');
     } finally {
       setLoading(false);
     }
@@ -74,6 +80,16 @@ const Courses = () => {
             Discover and learn from expert developers across various technologies and domains
           </p>
         </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="h-5 w-5 text-red-500" />
+              <span className="text-red-700 font-medium">{error}</span>
+            </div>
+          </div>
+        )}
 
         {/* Search and Filter */}
         <div className="flex flex-col lg:flex-row gap-6 justify-between items-start lg:items-center mb-12">

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import CourseService from '../services/courseService.js';
 import { Clock, User, Star, Play } from 'lucide-react';
 
 const CourseCard = ({ course }) => {
@@ -11,7 +12,7 @@ const CourseCard = ({ course }) => {
         <div className="h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
           {thumbnail ? (
             <img 
-              src={thumbnail} 
+              src={CourseService.getThumbnailUrl(thumbnail)} 
               alt={title}
               className="w-full h-full object-cover"
             />
@@ -20,7 +21,7 @@ const CourseCard = ({ course }) => {
           )}
         </div>
         <div className="absolute top-3 right-3 bg-white px-3 py-1 rounded-full text-sm font-semibold text-gray-900 shadow-sm">
-          ${price}
+          {CourseService.formatPrice(price)}
         </div>
       </div>
       
@@ -46,7 +47,7 @@ const CourseCard = ({ course }) => {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-2">
             <Clock className="h-4 w-4 text-gray-500" />
-            <span className="text-sm text-gray-600">{duration || 0} min</span>
+            <span className="text-sm text-gray-600">{CourseService.formatDuration(duration)}</span>
           </div>
           <span className="text-sm text-gray-600">{enrolledCount || 0} enrolled</span>
         </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import CourseService from '../services/courseService.js';
 import { Play, Clock, CheckCircle } from 'lucide-react';
 
 const EnrolledCourses = () => {
@@ -50,7 +51,7 @@ const EnrolledCourses = () => {
             <div key={course._id} className="card hover:shadow-lg transition-shadow">
               <div className="relative">
                 <img 
-                  src={course.thumbnail || '/api/placeholder/300/200'} 
+                  src={course.thumbnail ? CourseService.getThumbnailUrl(course.thumbnail) : '/api/placeholder/300/200'} 
                   alt={course.title}
                   className="w-full h-48 object-cover rounded-t-lg"
                 />

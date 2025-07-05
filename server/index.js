@@ -12,6 +12,7 @@ import authRoutes from './src/routes/auth.js';
 import courseRoutes from './src/routes/courses.js';
 import orderRoutes from './src/routes/orders.js';
 import videoRoutes from './src/routes/videos.js';
+import uploadRoutes from './src/routes/upload.js';
 
 // Load environment variables
 dotenv.config();
@@ -50,6 +51,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/videos', videoRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -70,6 +72,7 @@ app.get('/', (req, res) => {
       courses: '/api/courses',
       orders: '/api/orders',
       videos: '/api/videos',
+      upload: '/api/upload',
       health: '/api/health'
     }
   });
