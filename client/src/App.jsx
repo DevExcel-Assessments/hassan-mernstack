@@ -1,39 +1,82 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { ToastContainer } from './components/ui';
+import Navbar from './components/Navbar';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import Courses from './pages/Courses';
+import CourseDetail from './pages/CourseDetail';
+import Dashboard from './pages/Dashboard';
+import CreateCourse from './pages/CreateCourse';
+import MyCourses from './pages/MyCourses';
+import EnrolledCourses from './pages/EnrolledCourses';
+import VideoPlayer from './pages/VideoPlayer';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <div className="min-h-screen bg-red-100 flex items-center justify-center">
-      <div className="text-center">
-        <div className="flex justify-center space-x-8 mb-8">
-          <a href="https://vite.dev" target="_blank" className="hover:scale-110 transition-transform">
-            <img src={viteLogo} className="h-24 w-24" alt="Vite logo" />
-          </a>
-          <a href="https://react.dev" target="_blank" className="hover:scale-110 transition-transform">
-            <img src={reactLogo} className="h-24 w-24 animate-spin" alt="React logo" />
-          </a>
+    <AuthProvider>
+      <Router>
+        <div className="min-h-screen bg-gray-50">
+          <Navbar />
+          <main className="container mx-auto px-4 py-8">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/courses" element={<Courses />} />
+              <Route path="/courses/:id" element={<CourseDetail />} />
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/create-course" 
+                element={
+                  <ProtectedRoute requiredRole="mentor">
+                    <CreateCourse />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/my-courses" 
+                element={
+                  <ProtectedRoute requiredRole="mentor">
+                    <MyCourses />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/enrolled-courses" 
+                element={
+                  <ProtectedRoute requiredRole="learner">
+                    <EnrolledCourses />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/watch/:courseId" 
+                element={
+                  <ProtectedRoute>
+                    <VideoPlayer />
+                  </ProtectedRoute>
+                } 
+              />
+            </Routes>
+          </main>
+          <ToastContainer />
         </div>
-        <h1 className="text-4xl font-bold text-gray-800 mb-8">Vite + React + Tailwind</h1>
-        <div className="bg-white p-8 rounded-lg shadow-lg">
-          <button 
-            onClick={() => setCount((count) => count + 1)}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors mb-4"
-          >
-            Count is {count}
-          </button>
-          <p className="text-gray-600 mb-4">
-            Edit <code className="bg-gray-200 px-2 py-1 rounded text-sm">src/App.jsx</code> and save to test HMR
-          </p>
-        </div>
-        <p className="text-gray-500 mt-8">
-          Click on the Vite and React logos to learn more
-        </p>
-      </div>
-    </div>
-  )
+      </Router>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;
