@@ -67,48 +67,54 @@ const courseSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }],
-  reviews: [{
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    rating: {
-      type: Number,
-      min: 1,
-      max: 5
-    },
-    comment: String,
-    createdAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
-  averageRating: {
+  rating: {
     type: Number,
-    default: 0
+    default: 0,
+    min: 0,
+    max: 5
   },
-  totalReviews: {
+  reviewCount: {
     type: Number,
-    default: 0
+    default: 0,
+    min: 0
+  },
+  ratingDistribution: {
+    1: { type: Number, default: 0 },
+    2: { type: Number, default: 0 },
+    3: { type: Number, default: 0 },
+    4: { type: Number, default: 0 },
+    5: { type: Number, default: 0 }
   }
 }, {
   timestamps: true
 });
 
-courseSchema.methods.calculateAverageRating = function() {
-  if (this.reviews.length === 0) {
-    this.averageRating = 0;
-    this.totalReviews = 0;
-  } else {
-    const totalRating = this.reviews.reduce((sum, review) => sum + review.rating, 0);
-    this.averageRating = totalRating / this.reviews.length;
-    this.totalReviews = this.reviews.length;
-  }
-};
-
 courseSchema.virtual('enrolledCount').get(function() {
   return this.enrolledStudents.length;
 });
+
+courseSchema.virtual('formattedRating').get(function() {
+  return this.rating ? this.rating.toFixed(1) : '0.0';
+});
+
+courseSchema.methods.isUserEnrolled = function(userId) {
+  return this.enrolledStudents.includes(userId);
+};
+
+courseSchema.methods.updateRatingDistribution = async function() {
+  const Review = mongoose.model('Review');
+  const reviews = await Review.find({ course: this._id });
+  
+  this.ratingDistribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  
+  reviews.forEach(review => {
+    if (this.ratingDistribution[review.rating] !== undefined) {
+      this.ratingDistribution[review.rating]++;
+    }
+  });
+  
+  await this.save();
+};
 
 courseSchema.set('toJSON', { virtuals: true });
 courseSchema.set('toObject', { virtuals: true });

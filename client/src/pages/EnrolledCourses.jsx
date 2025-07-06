@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 import CourseService from '../services/courseService.js';
-import { Play, Clock, CheckCircle } from 'lucide-react';
+import EnrolledCoursesService from '../services/enrolledCoursesService.js';
+import { Play, Clock, CheckCircle, AlertCircle, RefreshCw, Star } from 'lucide-react';
 
 const EnrolledCourses = () => {
+  const { user } = useAuth();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchEnrolledCourses();
@@ -14,10 +17,16 @@ const EnrolledCourses = () => {
 
   const fetchEnrolledCourses = async () => {
     try {
-      const response = await axios.get('/api/orders/enrolled-courses');
-      setCourses(response.data);
+      
+      const result = await EnrolledCoursesService.getEnrolledCourses();
+      
+      if (result.success) {
+        setCourses(result.courses);
+      } else {
+        setError(result.error);
+      }
     } catch (error) {
-      console.error('Error fetching enrolled courses:', error);
+      setError(EnrolledCoursesService.getEnrollmentError(error));
     } finally {
       setLoading(false);
     }
@@ -26,7 +35,41 @@ const EnrolledCourses = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-lg text-gray-600">Loading courses...</div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="text-lg text-gray-600">Loading your courses...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">My Learning</h1>
+          <p className="text-gray-600">Continue your learning journey</p>
+        </div>
+
+        <div className="text-center py-12">
+          <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Courses</h2>
+          <p className="text-red-600 mb-4">{error}</p>
+          
+          <div className="space-x-4">
+            <button
+              onClick={fetchEnrolledCourses}
+              className="btn btn-primary inline-flex items-center space-x-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              <span>Try Again</span>
+            </button>
+            
+            <Link to="/courses" className="btn btn-secondary">
+              Browse Courses
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
@@ -92,6 +135,15 @@ const EnrolledCourses = () => {
                 >
                   <Play className="h-4 w-4" />
                   <span>Continue Learning</span>
+                </Link>
+                
+                {/* Review Button */}
+                <Link 
+                  to={`/course/${course._id}`}
+                  className="mt-2 w-full btn btn-secondary flex items-center justify-center space-x-2"
+                >
+                  <Star className="h-4 w-4" />
+                  <span>Rate & Review</span>
                 </Link>
               </div>
             </div>

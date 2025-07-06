@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { showSuccessToast, showErrorToast } from '../components/ui';
@@ -12,9 +12,18 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [redirectMessage, setRedirectMessage] = useState('');
 
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.message) {
+      setRedirectMessage(location.state.message);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleChange = (e) => {
     setFormData({
@@ -34,7 +43,9 @@ const Login = () => {
 
     if (result.success) {
       showSuccessToast('Login successful! Welcome back.');
-      navigate('/dashboard');
+      
+      const redirectTo = location.state?.from || '/dashboard';
+      navigate(redirectTo);
     } else {
       setError(result.error);
       showErrorToast(result.error);
@@ -53,7 +64,14 @@ const Login = () => {
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8"> 
+          {redirectMessage && (
+            <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-xl mb-6 flex items-center">
+              <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+              {redirectMessage}
+            </div>
+          )}
+
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center">
               <div className="w-2 h-2 bg-red-500 rounded-full mr-3"></div>

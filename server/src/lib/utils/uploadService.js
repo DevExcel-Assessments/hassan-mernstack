@@ -24,7 +24,6 @@ const isFFmpegAvailable = () => {
         return false;
       }
     });
-    console.log('FFmpeg is available and ready to use');
     return true;
   } catch (error) {
     console.warn('FFmpeg not available, video processing will be limited');
@@ -113,11 +112,11 @@ const generateVideoThumbnail = async (videoPath, outputPath, timestamp = '10', s
         size: size
       })
       .on('end', () => {
-        console.log('Thumbnail generated successfully:', outputPath);
+       
         resolve(outputPath);
       })
       .on('error', (err) => {
-        console.error('Thumbnail generation failed:', err.message);
+       
         reject(err);
       });
   });
@@ -141,12 +140,12 @@ const getVideoInfo = async (videoPath) => {
           };
           resolve(defaultInfo);
         } else {
-          console.log('Video info retrieved successfully');
+         
           resolve(metadata);
         }
       });
     } catch (error) {
-      console.warn('ffprobe error, using default video info:', error.message);
+     
       // Fallback to default video info
       const defaultInfo = {
         format: {
@@ -202,7 +201,7 @@ const processUploadedFile = async (file, fileType, options = {}) => {
   try {
     // Process video files
     if (fileType === 'video' || (fileType === 'file' && file.mimetype.startsWith('video/'))) {
-      console.log('Processing video file:', file.filename);
+     
       
       // Get video information
       const videoInfo = await getVideoInfo(file.path);
@@ -211,7 +210,7 @@ const processUploadedFile = async (file, fileType, options = {}) => {
       result.duration = duration;
       result.metadata = videoInfo;
 
-      console.log('Video duration:', duration, 'minutes');
+     
 
       // Only validate duration if we have real duration info (not default 5 minutes)
       if (videoInfo.format.duration !== 300) {
@@ -220,7 +219,7 @@ const processUploadedFile = async (file, fileType, options = {}) => {
           throw new Error(`Video duration must be ${options.maxDuration || 5} minutes or less`);
         }
       } else {
-        console.log('Using default duration, skipping validation');
+       
       }
 
       // Generate thumbnail if required
@@ -230,7 +229,7 @@ const processUploadedFile = async (file, fileType, options = {}) => {
           `${path.parse(file.filename).name}.jpg`
         );
         
-        console.log('Generating thumbnail...');
+       
         try {
           await generateVideoThumbnail(
             file.path,
@@ -240,9 +239,9 @@ const processUploadedFile = async (file, fileType, options = {}) => {
           );
           
           result.thumbnailPath = thumbnailPath;
-          console.log('Thumbnail generated:', thumbnailPath);
+         
         } catch (thumbnailError) {
-          console.warn('Thumbnail generation failed, continuing without thumbnail:', thumbnailError.message);
+         
           // Continue without thumbnail rather than failing the entire upload
         }
       }

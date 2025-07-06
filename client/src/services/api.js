@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:4000/api',
+  baseURL: 'http://localhost:4000/api', // Direct backend URL, no proxy
   timeout: 30000, // Increased timeout to 30 seconds
   headers: {
     'Content-Type': 'application/json',
@@ -11,8 +11,12 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
+   
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.warn('- No token found in localStorage for request:', config.url);
     }
     return config;
   },
@@ -26,6 +30,8 @@ api.interceptors.response.use(
     return response;
   },
   async (error) => {
+ 
+
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -44,8 +50,11 @@ api.interceptors.response.use(
           originalRequest.headers['Authorization'] = `Bearer ${token}`;
 
           return api(originalRequest);
+        } else {
+          console.warn(' No refresh token found');
         }
       } catch (refreshError) {
+        console.error(' Token refresh failed:', refreshError.response?.data?.message || refreshError.message);
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         window.location.href = '/login';

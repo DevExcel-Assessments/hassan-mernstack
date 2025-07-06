@@ -9,7 +9,7 @@ const deleteCourse = async (req, res) => {
       return res.status(404).json({ message: 'Course not found or not authorized' });
     }
 
-    // Delete associated files
+    
     if (fs.existsSync(course.videoUrl)) {
       fs.unlinkSync(course.videoUrl);
     }

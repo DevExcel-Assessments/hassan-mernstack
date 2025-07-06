@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import axios from 'axios';
+import { api } from '../services';
 import CourseService from '../services/courseService.js';
 import { Clock, User, Star, BookOpen, CheckCircle, DollarSign } from 'lucide-react';
 
@@ -13,6 +13,8 @@ const CourseDetail = () => {
   const [enrolling, setEnrolling] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
 
+  const isMentor = user && course && user._id === course.mentor._id;
+
   useEffect(() => {
     fetchCourse();
     if (user) {
@@ -20,9 +22,10 @@ const CourseDetail = () => {
     }
   }, [id, user]);
 
+
   const fetchCourse = async () => {
     try {
-      const response = await axios.get(`/api/courses/${id}`);
+      const response = await api.get(`/courses/${id}`);
       setCourse(response.data);
     } catch (error) {
       console.error('Error fetching course:', error);
@@ -33,7 +36,7 @@ const CourseDetail = () => {
 
   const checkEnrollment = async () => {
     try {
-      const response = await axios.get('/api/orders/enrolled-courses');
+      const response = await api.get('/orders/enrolled-courses');
       const enrolledCourses = response.data;
       setIsEnrolled(enrolledCourses.some(c => c._id === id));
     } catch (error) {
@@ -43,32 +46,20 @@ const CourseDetail = () => {
 
   const handleEnroll = async () => {
     if (!user) {
-     
       window.location.href = '/login';
       return;
     }
-
     setEnrolling(true);
     try {
-     
-      const orderResponse = await axios.post('/api/orders', {
-        courseId: id
-      });
-
-     
-      const confirmResponse = await axios.post('/api/orders/confirm-payment', {
-        paymentIntentId: orderResponse.data.paymentIntentId
-      });
-
-      setIsEnrolled(true);
-      alert('Successfully enrolled in the course!');
+      const orderResponse = await api.post('/orders', { courseId: id });
+      window.location.href = orderResponse.data.sessionUrl;
     } catch (error) {
-      console.error('Error enrolling:', error);
-      alert('Failed to enroll in the course. Please try again.');
-    } finally {
+      console.error('Error creating order:', error);
+      window.showToast('Failed to start payment. Please try again.', 'error');
       setEnrolling(false);
     }
   };
+
 
   if (loading) {
     return (
@@ -130,7 +121,7 @@ const CourseDetail = () => {
                 alt={course.title}
                 className="w-full h-48 object-cover rounded-lg"
               />
-              {!isEnrolled && (
+              {!isEnrolled && !isMentor && (
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
                   <span className="text-white font-medium">Preview Only</span>
                 </div>
@@ -143,7 +134,17 @@ const CourseDetail = () => {
                 <span className="text-sm text-gray-600">{course.enrolledCount} enrolled</span>
               </div>
               
-              {isEnrolled ? (
+              {isMentor ? (
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2 text-blue-600">
+                    <User className="h-5 w-5" />
+                    <span className="font-medium">You are the instructor</span>
+                  </div>
+                  <button className="w-full btn btn-secondary" disabled>
+                    Your Course
+                  </button>
+                </div>
+              ) : isEnrolled ? (
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2 text-green-600">
                     <CheckCircle className="h-5 w-5" />

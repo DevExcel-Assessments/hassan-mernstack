@@ -22,7 +22,7 @@ const orderSchema = new mongoose.Schema({
   },
   paymentIntentId: {
     type: String,
-    required: true
+    required: false
   },
   stripeSessionId: {
     type: String

@@ -8,7 +8,31 @@ class CourseService {
   async getAllCourses(params = {}) {
     try {
       const response = await api.get('/courses', { params });
-      return { success: true, courses: response.data.courses };
+      
+      // Handle both old and new response formats
+      if (response.data.success !== undefined) {
+        // New format with pagination and filters
+        return { 
+          success: true, 
+          courses: response.data.courses,
+          pagination: response.data.pagination,
+          filters: response.data.filters
+        };
+      } else {
+        // Old format (backward compatibility)
+        return { 
+          success: true, 
+          courses: response.data.courses || response.data,
+          pagination: {
+            currentPage: 1,
+            totalPages: 1,
+            total: response.data.courses?.length || response.data.length,
+            hasNextPage: false,
+            hasPrevPage: false,
+            limit: 12
+          }
+        };
+      }
     } catch (error) {
       return {
         success: false,
@@ -107,6 +131,30 @@ class CourseService {
     }
   }
 
+  async publishCourse(courseId) {
+    try {
+      const response = await api.patch(`/courses/${courseId}/publish`);
+      return { success: true, course: response.data.course };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to publish course'
+      };
+    }
+  }
+
+  async unpublishCourse(courseId) {
+    try {
+      const response = await api.patch(`/courses/${courseId}/unpublish`);
+      return { success: true, course: response.data.course };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to unpublish course'
+      };
+    }
+  }
+
   // ========================================
   // VIDEO OPERATIONS
   // ========================================
@@ -132,7 +180,7 @@ class CourseService {
     if (!thumbnailPath) {
       return null; // No thumbnail available
     }
-    // Convert relative path to full URL
+    // Convert relative path to direct backend URL
     return `http://localhost:4000/${thumbnailPath.replace(/\\/g, '/')}`;
   }
 

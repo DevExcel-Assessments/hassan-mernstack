@@ -1,10 +1,28 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import CourseService from '../services/courseService.js';
-import { Clock, User, Star, Play } from 'lucide-react';
+import { Clock, User, Star, Play, Eye } from 'lucide-react';
 
-const CourseCard = ({ course }) => {
+const CourseCard = ({ course, onPreviewClick }) => {
   const { _id, title, description, thumbnail, price, mentor, duration, rating, enrolledCount } = course;
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handlePreviewClick = () => {
+    if (!user) {
+      navigate('/login', { 
+        state: { 
+          from: '/courses',
+          message: 'Please log in to preview this course video.'
+        }
+      });
+      return;
+    }
+    
+    // User is logged in, proceed with preview
+    onPreviewClick(course);
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
@@ -52,12 +70,21 @@ const CourseCard = ({ course }) => {
           <span className="text-sm text-gray-600">{enrolledCount || 0} enrolled</span>
         </div>
         
-        <Link 
-          to={`/courses/${_id}`}
-          className="w-full bg-gray-900 text-white py-3 px-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors text-center block"
-        >
-          View Course
-        </Link>
+        <div className="flex space-x-3">
+          <button
+            onClick={handlePreviewClick}
+            className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-xl font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+          >
+            <Eye className="h-4 w-4" />
+            <span>{user ? 'Preview' : 'Login to Preview'}</span>
+          </button>
+          <Link 
+            to={`/courses/${_id}`}
+            className="flex-1 bg-gray-900 text-white py-3 px-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors text-center block"
+          >
+            View Course
+          </Link>
+        </div>
       </div>
     </div>
   );

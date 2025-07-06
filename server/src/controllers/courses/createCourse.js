@@ -18,21 +18,18 @@ const createCourse = async (req, res) => {
       whatYouWillLearn
     } = req.body;
 
-    // Validate required fields
     if (!title || !description || !category || !price) {
       return res.status(400).json({ 
         message: 'Title, description, category, and price are required' 
       });
     }
 
-    // Process the uploaded video using the upload service
     const uploadResult = await uploadService.processFile(req.file, 'video', {
-      maxDuration: 5, // 5 minutes max as per README
-      thumbnailTimestamp: '10', // Generate thumbnail at 10 seconds as per README
+      maxDuration: 5, 
+      thumbnailTimestamp: '10', 
       thumbnailSize: '640x360'
     });
 
-    // Create course with all required fields
     const course = new Course({
       title: title.trim(),
       description: description.trim(),
@@ -44,9 +41,9 @@ const createCourse = async (req, res) => {
       whatYouWillLearn: whatYouWillLearn ? whatYouWillLearn.split(',').map(item => item.trim()) : [],
       mentor: req.user._id,
       videoUrl: uploadResult.originalPath,
-      thumbnail: uploadResult.thumbnailPath || null, // Handle case where thumbnail is not generated
-      duration: uploadResult.duration || 5, // Default to 5 minutes if not available
-      isPublished: false // Start as draft, mentor can publish later
+      thumbnail: uploadResult.thumbnailPath || null, 
+      duration: uploadResult.duration || 5, 
+      isPublished: false 
     });
 
     await course.save();
@@ -67,7 +64,7 @@ const createCourse = async (req, res) => {
   } catch (error) {
     console.error('Error creating course:', error);
     
-    // Clean up uploaded file if there was an error
+      
     if (req.file && req.file.path) {
       uploadService.cleanupFile(req.file.path);
     }

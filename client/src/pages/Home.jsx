@@ -5,7 +5,6 @@ import { BookOpen, Users, Video, Award, ArrowRight, CheckCircle, Star, Play } fr
 const Home = () => {
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-gray-50 via-white to-gray-100 py-20 lg:py-32">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
@@ -33,7 +32,6 @@ const Home = () => {
               </Link>
             </div>
             
-            {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
               <div className="text-center">
                 <div className="text-3xl font-bold text-gray-900 mb-2">10K+</div>
@@ -52,7 +50,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Features Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -98,7 +95,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Popular Courses Preview */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -109,7 +105,6 @@ const Home = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {/* Course Card 1 */}
             <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">
               <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 rounded-t-2xl flex items-center justify-center">
                 <Play className="h-12 w-12 text-white" />
@@ -176,7 +171,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -250,7 +244,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-20 bg-gray-900 text-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">

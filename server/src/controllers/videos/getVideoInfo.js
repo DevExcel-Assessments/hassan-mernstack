@@ -5,13 +5,13 @@ const getVideoInfo = async (req, res) => {
   try {
     const { courseId } = req.params;
 
-    // Check if course exists
+    
     const course = await Course.findById(courseId);
     if (!course) {
       return res.status(404).json({ message: 'Course not found' });
     }
 
-    // Check if user is enrolled or is the mentor
+    
     const isEnrolled = await Order.findOne({
       user: req.user._id,
       course: courseId,

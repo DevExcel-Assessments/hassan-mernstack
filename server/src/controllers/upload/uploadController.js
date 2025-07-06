@@ -2,7 +2,7 @@ import uploadService from '../../lib/utils/uploadService.js';
 import path from 'path';
 import fs from 'fs';
 
-// Generic upload handler
+ 
 const uploadFile = async (req, res) => {
   try {
     if (!req.file) {
@@ -12,10 +12,10 @@ const uploadFile = async (req, res) => {
       });
     }
 
-    // Detect file type from MIME type
+   
     const detectedFileType = uploadService.getFileTypeFromMime(req.file.mimetype);
     
-    // Process the uploaded file based on detected type
+   
     const result = await uploadService.processFile(req.file, detectedFileType, {
       maxDuration: req.body.maxDuration || 5,
       thumbnailTimestamp: req.body.thumbnailTimestamp || '10',
@@ -46,7 +46,7 @@ const uploadFile = async (req, res) => {
   }
 };
 
-// Video upload handler
+ 
 const uploadVideo = async (req, res) => {
   try {
     if (!req.file) {
@@ -56,7 +56,7 @@ const uploadVideo = async (req, res) => {
       });
     }
 
-    // Process video with specific options
+   
     const result = await uploadService.processFile(req.file, 'video', {
       maxDuration: parseInt(req.body.maxDuration) || 5,
       thumbnailTimestamp: req.body.thumbnailTimestamp || '10',
@@ -85,7 +85,7 @@ const uploadVideo = async (req, res) => {
   }
 };
 
-// Image upload handler
+ 
 const uploadImage = async (req, res) => {
   try {
     if (!req.file) {
@@ -95,7 +95,7 @@ const uploadImage = async (req, res) => {
       });
     }
 
-    // Process image
+   
     const result = await uploadService.processFile(req.file, 'image');
 
     res.json({
@@ -119,7 +119,7 @@ const uploadImage = async (req, res) => {
   }
 };
 
-// Thumbnail upload handler
+ 
 const uploadThumbnail = async (req, res) => {
   try {
     if (!req.file) {
@@ -129,7 +129,7 @@ const uploadThumbnail = async (req, res) => {
       });
     }
 
-    // Process thumbnail
+   
     const result = await uploadService.processFile(req.file, 'thumbnail');
 
     res.json({
@@ -153,7 +153,7 @@ const uploadThumbnail = async (req, res) => {
   }
 };
 
-// Generate thumbnail from existing video
+ 
 const generateThumbnail = async (req, res) => {
   try {
     const { videoPath, timestamp = '10', size = '640x360' } = req.body;
@@ -188,7 +188,7 @@ const generateThumbnail = async (req, res) => {
   }
 };
 
-// Get file information
+ 
 const getFileInfo = async (req, res) => {
   try {
     const { filePath } = req.params;
@@ -211,7 +211,7 @@ const getFileInfo = async (req, res) => {
       isDirectory: stats.isDirectory()
     };
 
-    // If it's a video file, get additional info
+    
     if (filePath.match(/\.(mp4|avi|mov|wmv|webm)$/i)) {
       try {
         const videoInfo = await uploadService.getVideoInfo(filePath);

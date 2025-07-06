@@ -8,13 +8,13 @@ const createOrder = async (req, res) => {
   try {
     const { courseId } = req.body;
 
-    // Check if course exists
-    const course = await Course.findById(courseId);
+   
+    const course = await Course.findById(courseId).populate('mentor', 'name');
     if (!course) {
       return res.status(404).json({ message: 'Course not found' });
     }
 
-    // Check if user is already enrolled
+   
     const existingOrder = await Order.findOne({
       user: req.user._id,
       course: courseId,
@@ -25,33 +25,57 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'Already enrolled in this course' });
     }
 
-    // Create Stripe PaymentIntent
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: course.price * 100, // Convert to cents
-      currency: 'usd',
-      automatic_payment_methods: {
-        enabled: true,
-      },
+   
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: course.title,
+              description: course.description,
+             
+              ...(course.thumbnail && {
+                images: [
+                 
+                  course.thumbnail.startsWith('http') 
+                    ? course.thumbnail 
+                    : `${process.env.CLIENT_URL || 'http://localhost:5173'}/api${course.thumbnail.replace(/\\/g, '/')}`
+                ]
+              }),
+            },
+            unit_amount: Math.round(course.price * 100), // Convert to cents
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment-confirmation?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment-confirmation?canceled=true`,
       metadata: {
         courseId: courseId,
-        userId: req.user._id.toString()
-      }
+        userId: req.user._id.toString(),
+        courseTitle: course.title,
+        mentorName: course.mentor.name
+      },
+      customer_email: req.user.email,
     });
 
-    // Create order
+   
     const order = new Order({
       user: req.user._id,
       course: courseId,
       amount: course.price,
-      paymentIntentId: paymentIntent.id,
+      stripeSessionId: session.id,
       status: 'pending'
     });
 
     await order.save();
 
     res.status(201).json({
-      message: 'Order created successfully',
-      clientSecret: paymentIntent.client_secret,
+      message: 'Checkout session created successfully',
+      sessionUrl: session.url,
       orderId: order._id
     });
   } catch (error) {

@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import CourseService from '../services/courseService.js';
-import { Plus, Edit, Trash2, Users, DollarSign, Play, Eye, AlertCircle } from 'lucide-react';
+import ConfirmationModal from '../components/ui/ConfirmationModal.jsx';
+import { Plus, Edit, Trash2, Users, DollarSign, Play, Eye, AlertCircle, Globe, EyeOff } from 'lucide-react';
 
 const MyCourses = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [publishing, setPublishing] = useState({});
+  
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, courseId: null, courseTitle: '' });
+  const [unpublishModal, setUnpublishModal] = useState({ isOpen: false, courseId: null, courseTitle: '' });
 
   useEffect(() => {
     fetchMyCourses();
@@ -14,15 +19,11 @@ const MyCourses = () => {
 
   const fetchMyCourses = async () => {
     try {
-      console.log('Fetching mentor courses...');
       const result = await CourseService.getMentorCourses();
-      console.log('API result:', result);
-      
+
       if (result.success) {
-        console.log('Setting courses:', result.courses);
         setCourses(result.courses || []);
       } else {
-        console.log('API error:', result.error);
         setError(result.error);
         setCourses([]);
       }
@@ -36,18 +37,83 @@ const MyCourses = () => {
   };
 
   const handleDelete = async (courseId) => {
-    if (window.confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
-      try {
-        const result = await CourseService.deleteCourse(courseId);
-        if (result.success) {
-          setCourses(courses.filter(course => course._id !== courseId));
-        } else {
-          alert(result.error || 'Failed to delete course');
-        }
-      } catch (error) {
-        console.error('Error deleting course:', error);
-        alert('Failed to delete course');
+    const course = courses.find(c => c._id === courseId);
+    setDeleteModal({
+      isOpen: true,
+      courseId,
+      courseTitle: course?.title || 'this course'
+    });
+  };
+
+  const confirmDelete = async () => {
+    try {
+      const result = await CourseService.deleteCourse(deleteModal.courseId);
+      if (result.success) {
+        setCourses(courses.filter(course => course._id !== deleteModal.courseId));
+        window.showToast('Course deleted successfully!', 'success');
+      } else {
+        window.showToast(result.error || 'Failed to delete course', 'error');
       }
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      window.showToast('Failed to delete course', 'error');
+    } finally {
+      setDeleteModal({ isOpen: false, courseId: null, courseTitle: '' });
+    }
+  };
+
+  const handlePublish = async (courseId) => {
+    setPublishing(prev => ({ ...prev, [courseId]: true }));
+    try {
+      const result = await CourseService.publishCourse(courseId);
+      if (result.success) {
+        setCourses(courses.map(course => 
+          course._id === courseId 
+            ? { ...course, isPublished: true }
+            : course
+        ));
+        window.showToast('Course published successfully!', 'success');
+      } else {
+        window.showToast(result.error || 'Failed to publish course', 'error');
+      }
+    } catch (error) {
+      console.error('Error publishing course:', error);
+      window.showToast('Failed to publish course', 'error');
+    } finally {
+      setPublishing(prev => ({ ...prev, [courseId]: false }));
+    }
+  };
+
+  const handleUnpublish = async (courseId) => {
+    const course = courses.find(c => c._id === courseId);
+    setUnpublishModal({
+      isOpen: true,
+      courseId,
+      courseTitle: course?.title || 'this course'
+    });
+  };
+
+  const confirmUnpublish = async () => {
+    setPublishing(prev => ({ ...prev, [unpublishModal.courseId]: true }));
+    try {
+      const result = await CourseService.unpublishCourse(unpublishModal.courseId);
+      if (result.success) {
+        // Update the course in the local state
+        setCourses(courses.map(course => 
+          course._id === unpublishModal.courseId 
+            ? { ...course, isPublished: false }
+            : course
+        ));
+        window.showToast('Course unpublished successfully!', 'success');
+      } else {
+        window.showToast(result.error || 'Failed to unpublish course', 'error');
+      }
+    } catch (error) {
+      console.error('Error unpublishing course:', error);
+      window.showToast('Failed to unpublish course', 'error');
+    } finally {
+      setPublishing(prev => ({ ...prev, [unpublishModal.courseId]: false }));
+      setUnpublishModal({ isOpen: false, courseId: null, courseTitle: '' });
     }
   };
 
@@ -64,7 +130,6 @@ const MyCourses = () => {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2">My Courses</h1>
@@ -79,7 +144,6 @@ const MyCourses = () => {
           </Link>
         </div>
 
-        {/* Error Display */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
             <div className="flex items-center space-x-2">
@@ -89,7 +153,6 @@ const MyCourses = () => {
           </div>
         )}
 
-        {/* Courses Grid */}
         {courses.length === 0 ? (
           <div className="text-center py-16">
             <div className="max-w-md mx-auto">
@@ -113,7 +176,6 @@ const MyCourses = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {courses.map(course => (
               <div key={course._id} className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
-                {/* Course Thumbnail */}
                 <div className="relative h-48 bg-gradient-to-br from-gray-200 to-gray-300">
                   {course.thumbnail ? (
                     <img 
@@ -127,7 +189,6 @@ const MyCourses = () => {
                     </div>
                   )}
                   
-                  {/* Status Badge */}
                   <div className="absolute top-3 right-3">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                       CourseService.getStatusBadgeColor(course.isPublished)
@@ -137,7 +198,6 @@ const MyCourses = () => {
                   </div>
                 </div>
                 
-                {/* Course Content */}
                 <div className="p-6">
                   <h3 className="text-xl font-semibold text-gray-900 mb-2 line-clamp-1">
                     {course.title}
@@ -146,7 +206,6 @@ const MyCourses = () => {
                     {course.description}
                   </p>
                   
-                  {/* Course Stats */}
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
                       <div className="flex items-center space-x-1">
@@ -163,13 +222,11 @@ const MyCourses = () => {
                     </span>
                   </div>
                   
-                  {/* Course Details */}
                   <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                     <span className="capitalize">{course.level}</span>
                     <span>{CourseService.formatDuration(course.duration)}</span>
                   </div>
                   
-                  {/* Action Buttons */}
                   <div className="flex items-center space-x-3">
                     <Link 
                       to={`/courses/${course._id}`}
@@ -178,6 +235,29 @@ const MyCourses = () => {
                       <Eye className="h-4 w-4" />
                       <span>View Course</span>
                     </Link>
+                      
+                    {course.isPublished ? (
+                      <button
+                        onClick={() => handleUnpublish(course._id)}
+                        disabled={publishing[course._id]}
+                        className="flex items-center cursor-pointer space-x-2 px-4 py-2 bg-yellow-100 text-yellow-700 rounded-xl hover:bg-yellow-200 transition-colors disabled:opacity-50"
+                        title="Unpublish course"
+                      >
+                        <EyeOff className="h-4 w-4" />
+                        <span>{publishing[course._id] ? 'Unpublishing...' : 'Unpublish'}</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handlePublish(course._id)}
+                        disabled={publishing[course._id]}
+                        className="flex items-center cursor-pointer space-x-2 px-4 py-2 bg-green-100 text-green-700 rounded-xl hover:bg-green-200 transition-colors disabled:opacity-50"
+                        title="Publish course"
+                      >
+                        <Globe className="h-4 w-4" />
+                        <span>{publishing[course._id] ? 'Publishing...' : 'Publish'}</span>
+                      </button>
+                    )}
+                    
                     <button
                       onClick={() => handleDelete(course._id)}
                       className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors"
@@ -223,6 +303,31 @@ const MyCourses = () => {
             </div>
           </div>
         )}
+
+        {/* Confirmation Modals */}
+        <ConfirmationModal
+          isOpen={deleteModal.isOpen}
+          onClose={() => setDeleteModal({ isOpen: false, courseId: null, courseTitle: '' })}
+          onConfirm={confirmDelete}
+          title="Delete Course"
+          message={`Are you sure you want to delete "${deleteModal.courseTitle}"? This action cannot be undone.`}
+          type="warning"
+          confirmText="Delete Course"
+          cancelText="Cancel"
+          confirmButtonColor="red"
+        />
+
+        <ConfirmationModal
+          isOpen={unpublishModal.isOpen}
+          onClose={() => setUnpublishModal({ isOpen: false, courseId: null, courseTitle: '' })}
+          onConfirm={confirmUnpublish}
+          title="Unpublish Course"
+          message={`Are you sure you want to unpublish "${unpublishModal.courseTitle}"? It will no longer be visible to students.`}
+          type="warning"
+          confirmText="Unpublish"
+          cancelText="Cancel"
+          confirmButtonColor="yellow"
+        />
       </div>
     </div>
   );

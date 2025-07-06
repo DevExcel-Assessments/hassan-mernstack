@@ -39,10 +39,10 @@ const CreateCourse = () => {
   const handleVideoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Reset error state
+     
       setError('');
       
-      // Validate video file using service
+     
       const validation = CourseService.validateVideoFile(file);
       if (!validation.isValid) {
         setError(Object.values(validation.errors)[0]);
@@ -69,18 +69,18 @@ const CreateCourse = () => {
     setUploadProgress(0);
 
     try {
-      // Create course using service
+     
       const result = await CourseService.createCourse(courseData, setUploadProgress);
       
       if (result.success) {
-        // Show success message and redirect
-        alert('Course created successfully!');
+       
+        window.showToast('Course created successfully!', 'success');
         navigate('/my-courses');
       } else {
         setError(result.error || 'Failed to create course');
       }
     } catch (error) {
-      console.error('Error creating course:', error);
+     
       setError('Failed to create course');
     } finally {
       setUploading(false);
@@ -91,13 +91,13 @@ const CreateCourse = () => {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
+       
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Create New Course</h1>
           <p className="text-lg text-gray-600">Share your knowledge with the developer community</p>
         </div>
         
-        {/* Error Display */}
+       
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
             <div className="flex items-center space-x-2">
@@ -108,7 +108,7 @@ const CreateCourse = () => {
         )}
         
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Basic Information */}
+         
           <div className="bg-white rounded-2xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Basic Information</h2>
             
@@ -203,7 +203,7 @@ const CreateCourse = () => {
             </div>
           </div>
 
-          {/* Video Upload */}
+         
           <div className="bg-white rounded-2xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Course Video</h2>
             
@@ -257,7 +257,7 @@ const CreateCourse = () => {
                 )}
               </div>
               
-              {/* Upload Progress */}
+             
               {uploading && (
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm text-gray-600">
@@ -275,7 +275,7 @@ const CreateCourse = () => {
             </div>
           </div>
 
-          {/* Additional Information */}
+         
           <div className="bg-white rounded-2xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Additional Information</h2>
             
@@ -327,7 +327,7 @@ const CreateCourse = () => {
             </div>
           </div>
 
-          {/* Action Buttons */}
+                
           <div className="flex justify-end space-x-4">
             <button
               type="button"

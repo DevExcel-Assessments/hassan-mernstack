@@ -31,11 +31,9 @@ const ForgotPassword = () => {
     setLoading(false);
 
     if (result.success) {
-      // Store the reset code for development testing (if available in response)
       if (result.resetCode) {
         setDevResetCode(result.resetCode);
       } else {
-        console.log('No reset code in response');
       }
       setOtpModalOpen(true);
       showSuccessToast('Reset code sent to your email!');
@@ -65,11 +63,11 @@ const ForgotPassword = () => {
     setResendLoading(false);
     
     if (result.success) {
-      // Update the reset code if a new one is provided
       if (result.resetCode) {
         setDevResetCode(result.resetCode);
       } else {
-      }
+        console.log('No reset code in response');
+        }
       showSuccessToast('Reset code resent! Check your email.');
     } else {
       showErrorToast(result.error || 'Failed to resend code');

@@ -14,6 +14,7 @@ import CreateCourse from './pages/CreateCourse';
 import MyCourses from './pages/MyCourses';
 import EnrolledCourses from './pages/EnrolledCourses';
 import VideoPlayer from './pages/VideoPlayer';
+import PaymentConfirmation from './pages/PaymentConfirmation';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -30,6 +31,8 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/courses" element={<Courses />} />
               <Route path="/courses/:id" element={<CourseDetail />} />
+              <Route path="/course/:id" element={<CourseDetail />} />
+              <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
               <Route 
                 path="/dashboard" 
                 element={

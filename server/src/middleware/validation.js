@@ -8,7 +8,6 @@ export const validate = (schema) => {
     });
 
     if (error) {
-      console.log('Validation error:', error.details);
       const errorMessages = error.details.map(detail => ({
         field: detail.path.join('.'),
         message: detail.message
@@ -45,7 +44,7 @@ export const validateQuery = (schema) => {
       });
     }
 
-    // Replace req.query with validated data
+    
     req.query = value;
     next();
   };

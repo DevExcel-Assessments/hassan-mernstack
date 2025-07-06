@@ -13,6 +13,9 @@ import courseRoutes from './src/routes/courses.js';
 import orderRoutes from './src/routes/orders.js';
 import videoRoutes from './src/routes/videos.js';
 import uploadRoutes from './src/routes/upload.js';
+import dashboardRoutes from './src/routes/dashboard.js';
+import webhookRoutes from './src/routes/webhooks.js';
+import reviewRoutes from './src/routes/reviews.js';
 
 // Load environment variables
 dotenv.config();
@@ -52,6 +55,9 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/webhooks', webhookRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
